@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Operations Dashboard — Executive Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  function loadScript(src){
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  window.chartReady = loadScript("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js")
+    .catch(() => loadScript("https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"))
+    .catch(() => loadScript("https://unpkg.com/chart.js@4.4.0/dist/chart.umd.min.js"))
+    .catch(err => { console.error("All Chart.js CDNs failed", err); });
+</script>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-alt: #f1f5f9;
+    --surface-subtle: #f8fafc;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    
+    /* Professional & Restrained Color Palette */
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --accent-border: #bfdbfe;
+    
+    --brand-dark: #0f172a;
+    --brand-slate: #334155;
+    
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --success-border: #a7f3d0;
+    
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    
+    --danger: #ef4444;
+    --danger-light: #fef2f2;
+    --danger-border: #fecaca;
+
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    --shadow-hover: 0 8px 24px -4px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.02) 0px, transparent 50%);
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    padding: 28px 32px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--accent-light); color: var(--accent); }
+
+  .app-container {
+    max-width: 1380px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Header Section ---------- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s ease;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  }
+
+  .brand-icon svg { width: 22px; height: 22px; }
+
+  .brand-text h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+  }
+
+  .brand-text .sub {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .date-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+  }
+
+  .date-box:focus-within {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .date-box label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  input[type="date"] {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+  }
+
+  button#refreshBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--brand-dark);
+    color: #ffffff;
+    border: 1px solid transparent;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    box-shadow: var(--shadow-xs);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  button#refreshBtn:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  }
+
+  button#refreshBtn:active { 
+    transform: translateY(0); 
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 99px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 2px var(--success-light);
+  }
+
+  .status.loading .dot {
+    background: var(--warning);
+    box-shadow: 0 0 0 2px var(--warning-light);
+    animation: pulse 1s infinite alternate;
+  }
+
+  .status.error .dot { 
+    background: var(--danger); 
+    box-shadow: 0 0 0 2px var(--danger-light);
+  }
+
+  @keyframes pulse { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+
+  /* ---------- Executive KPI Cards Row ---------- */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--border);
+    transition: background 0.2s ease;
+  }
+
+  .kpi-card:hover::before {
+    background: var(--accent);
+  }
+
+  .kpi-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .kpi-card .label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .kpi-icon-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--brand-slate);
+    transition: all 0.2s ease;
+  }
+
+  .kpi-card:hover .kpi-icon-badge {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent-border);
+  }
+
+  .kpi-icon-badge svg { width: 17px; height: 17px; }
+
+  .kpi-card .value {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-feature-settings: 'tnum';
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    color: var(--text-main);
+  }
+
+  .kpi-card .sub-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .kpi-card .sub-tag b { 
+    color: var(--text-main); 
+    font-weight: 700;
+  }
+
+  /* ---------- Modular Grid Layout (Main Section) ---------- */
+  .grid-layout {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s ease;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .panel h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+
+  .panel .desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  canvas {
+    max-height: 270px;
+    width: 100% !important;
+  }
+
+  /* ---------- Rep Leaderboard ---------- */
+  #leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 310px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+
+  #leaderboard::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  #leaderboard::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  #leaderboard::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 99px;
+  }
+
+  .rep-card {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all 0.15s ease;
+  }
+
+  .rep-card:hover {
+    background: var(--surface);
+    border-color: var(--border-hover);
+    transform: translateX(2px);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .rep-rank-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .rep-card:nth-child(1) .rep-rank-badge { 
+    background: var(--accent-light); 
+    color: var(--accent); 
+    border-color: var(--accent-border); 
+  }
+  .rep-card:nth-child(2) .rep-rank-badge { 
+    background: #f8fafc; 
+    color: var(--brand-slate); 
+    border-color: var(--border-hover);
+  }
+  .rep-card:nth-child(3) .rep-rank-badge { 
+    background: #f8fafc; 
+    color: var(--text-muted); 
+  }
+
+  .rep-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rep-bar-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .rep-bar-fill {
+    height: 100%;
+    background: var(--brand-dark);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .rep-card:nth-child(1) .rep-bar-fill {
+    background: var(--accent);
+  }
+
+  .rep-nums {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .rep-nums .rev {
+    color: var(--text-main);
+    font-weight: 700;
+    display: block;
+    font-size: 12.5px;
+  }
+
+  .rep-nums .cnt {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  /* ---------- Secondary Grid Row (Bottom Panels) ---------- */
+  .grid-layout-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .summary-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+  .stat-box {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    transition: all 0.2s ease;
+  }
+
+  .stat-box:hover {
+    background: var(--surface);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .stat-box label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .stat-box val {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-feature-settings: 'tnum';
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-main);
+    display: block;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-box sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* Empty & Error State */
+  .empty, .error-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    padding: 28px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-subtle);
+  }
+
+  .error-box {
+    color: var(--danger);
+    border-color: var(--danger-border);
+    background: var(--danger-light);
+    text-align: left;
+  }
+
+  .error-box b {
+    display: block;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 1024px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-layout { grid-template-columns: 1fr; }
+    .grid-layout-bottom { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .kpi-row { grid-template-columns: 1fr; }
+    header { flex-direction: column; align-items: stretch; }
+    .controls { justify-content: space-between; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header Control Bar -->
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Sales Operations Dashboard</h1>
+        <div class="sub">Real-Time Revenue Analytics & Field Team Performance</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="date-box">
+        <label for="reportDate">Report Date</label>
+        <input type="date" id="reportDate">
+      </div>
+      <button id="refreshBtn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Refresh
+      </button>
+      <div class="status" id="statusEl">
+        <span class="dot"></span>
+        <span id="statusText">idle</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Executive KPI Cards Row -->
+  <div class="kpi-row" id="kpiRow">
+    <!-- Injected via JavaScript -->
+  </div>
+
+  <!-- Primary Grid Section -->
+  <div class="grid-layout">
+    <!-- Daily Revenue & Order Volume -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Daily Revenue & Order Volume</h2>
+          <div class="desc">Daily breakdown of sales orders and total revenue generated</div>
+        </div>
+      </div>
+      <canvas id="dailyChart"></canvas>
+    </div>
+
+    <!-- Rep Leaderboard -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Sales Rep Leaderboard</h2>
+          <div class="desc">Ranked by month-to-date total revenue</div>
+        </div>
+      </div>
+      <div id="leaderboard"><div class="empty">No rep data loaded</div></div>
+    </div>
+  </div>
+
+  <!-- Secondary Bottom Grid Section -->
+  <div class="grid-layout-bottom">
+    <!-- Monthly Volume Chart -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Monthly Order Volume</h2>
+          <div class="desc">All-time order count performance categorized by month</div>
+        </div>
+      </div>
+      <canvas id="monthChart" style="max-height:220px;"></canvas>
+    </div>
+
+    <!-- Executive Overview Card -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Performance Summary</h2>
+          <div class="desc">Key sales execution & comparative indicators</div>
+        </div>
+      </div>
+      <div class="summary-stat-grid" id="summaryGrid">
+        <div class="stat-box">
+          <label>Today Revenue</label>
+          <val id="statTodayRev">—</val>
+          <sub id="statTodayCnt">0 orders</sub>
+        </div>
+        <div class="stat-box">
+          <label>MTD Revenue</label>
+          <val id="statMtdRev">—</val>
+          <sub id="statMtdCnt">0 orders</sub>
+        </div>
+        <div class="stat-box">
+          <label>Prev Month Same Day</label>
+          <val id="statPrevSameRev">—</val>
+          <sub id="statPrevSameCnt">0 orders</sub>
+        </div>
+        <div class="stat-box">
+          <label>Prev Month Total</label>
+          <val id="statPrevTotRev">—</val>
+          <sub id="statPrevTotCnt">0 orders</sub>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://lphusvuslgeezvpurlmj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_CgvgcJJQHsB0lG6w0sJauw_MgIva20y";
+
+const fmtINR = n => n == null ? '—' : '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+const fmtNum = n => n == null ? '—' : Number(n).toLocaleString('en-IN');
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const statusEl = document.getElementById('statusEl');
+const statusText = document.getElementById('statusText');
+const dateInput = document.getElementById('reportDate');
+
+function setStatus(state, text){
+  statusEl.className = 'status ' + state;
+  statusText.textContent = text;
+}
+
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+dateInput.value = todayStr();
+
+let dailyChart, monthChart;
+
+async function fetchDashboard(reportDate){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_sales_dashboard`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ report_date: reportDate })
+  });
+
+  if(!res.ok){
+    const errText = await res.text();
+    throw new Error(`${res.status} ${res.statusText} — ${errText}`);
+  }
+  const rows = await res.json();
+  if(!rows || !rows.length) throw new Error('No rows returned from get_sales_dashboard.');
+  return rows[0];
+}
+
+function renderError(err){
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="error-box" style="grid-column:1/-1;">
+      <b>Couldn't load dashboard data</b>
+      ${err.message}<br><br>
+      Check: (1) "salesdashboard" schema exposed in Data API,
+      (2) EXECUTE grant on get_sales_dashboard for anon,
+      (3) valid date selected.
+    </div>`;
+  document.getElementById('leaderboard').innerHTML = '<div class="empty">No rep data</div>';
+}
+
+const kpiIcons = [
+  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>`,
+  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>`,
+  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`,
+  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>`
+];
+
+function renderKPIs(kpi){
+  const k = (kpi && kpi[0]) || {};
+  const cards = [
+    { label: "Today Orders", value: fmtNum(k.today_sales), sub: fmtINR(k.today_revenue) },
+    { label: "Month to Date", value: fmtNum(k.mtd_sales), sub: fmtINR(k.mtd_revenue) },
+    { label: "Prev Month · Same Day", value: fmtNum(k.prev_month_same_day_sales), sub: fmtINR(k.prev_month_same_day_revenue) },
+    { label: "Prev Month · Total", value: fmtNum(k.prev_month_sales), sub: fmtINR(k.prev_month_revenue) },
+  ];
+
+  document.getElementById('kpiRow').innerHTML = cards.map((c, i) => `
+    <div class="kpi-card">
+      <div class="kpi-card-header">
+        <span class="label">${c.label}</span>
+        <div class="kpi-icon-badge">${kpiIcons[i]}</div>
+      </div>
+      <div class="value">${c.value}</div>
+      <div class="sub-tag">Rev: <b>${c.sub}</b></div>
+    </div>
+  `).join('');
+
+  // Also populate summary stats
+  document.getElementById('statTodayRev').textContent = fmtINR(k.today_revenue);
+  document.getElementById('statTodayCnt').textContent = fmtNum(k.today_sales) + ' orders';
+  document.getElementById('statMtdRev').textContent = fmtINR(k.mtd_revenue);
+  document.getElementById('statMtdCnt').textContent = fmtNum(k.mtd_sales) + ' orders';
+  document.getElementById('statPrevSameRev').textContent = fmtINR(k.prev_month_same_day_revenue);
+  document.getElementById('statPrevSameCnt').textContent = fmtNum(k.prev_month_same_day_sales) + ' orders';
+  document.getElementById('statPrevTotRev').textContent = fmtINR(k.prev_month_revenue);
+  document.getElementById('statPrevTotCnt').textContent = fmtNum(k.prev_month_sales) + ' orders';
+}
+
+function renderLeaderboard(reps){
+  const el = document.getElementById('leaderboard');
+  if(!reps || !reps.length){ el.innerHTML = '<div class="empty">No sales rep data for this period</div>'; return; }
+  const maxRev = Math.max(...reps.map(r => Number(r.mtd_revenue || 0)), 1);
+
+  el.innerHTML = reps.map((r, i) => `
+    <div class="rep-card">
+      <div class="rep-rank-badge">${String(i+1).padStart(2,'0')}</div>
+      <div>
+        <div class="rep-name">${r.sales_rep ?? 'Unknown Agent'}</div>
+        <div class="rep-bar-track">
+          <div class="rep-bar-fill" style="width:${(Number(r.mtd_revenue||0)/maxRev*100).toFixed(1)}%"></div>
+        </div>
+      </div>
+      <div class="rep-nums">
+        <span class="rev">${fmtINR(r.mtd_revenue)}</span>
+        <span class="cnt">${fmtNum(r.mtd_sales)} orders</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDailyChart(daily){
+  const ctx = document.getElementById('dailyChart');
+  const labels = (daily||[]).map(d => `Day ${new Date(d.order_date).getDate()}`);
+  const revenue = (daily||[]).map(d => Number(d.total_revenue||0));
+  const count = (daily||[]).map(d => Number(d.no_of_sales||0));
+
+  if(dailyChart) dailyChart.destroy();
+
+  const chartCtx = ctx.getContext('2d');
+  const blueGradient = chartCtx.createLinearGradient(0, 0, 0, 240);
+  blueGradient.addColorStop(0, 'rgba(37, 99, 235, 0.16)');
+  blueGradient.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+
+  dailyChart = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Orders', data: count, yAxisID: 'y1',
+          backgroundColor: 'rgba(148, 163, 184, 0.45)',
+          hoverBackgroundColor: 'rgba(100, 116, 139, 0.7)',
+          borderWidth: 0,
+          borderRadius: 4,
+          barThickness: 12
+        },
+        {
+          type: 'line', label: 'Revenue', data: revenue, yAxisID: 'y',
+          borderColor: '#2563eb',
+          backgroundColor: blueGradient,
+          borderWidth: 2.5,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 3.5,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#2563eb',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { 
+          labels: { 
+            color: '#64748b', 
+            font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
+            usePointStyle: true,
+            boxWidth: 8
+          } 
+        },
+        tooltip: {
+          backgroundColor: '#0f172a',
+          titleColor: '#ffffff',
+          bodyColor: '#e2e8f0',
+          titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 700 },
+          bodyFont: { family: 'JetBrains Mono', size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          boxPadding: 4
+        }
+      },
+      scales: {
+        x: { 
+          ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, 
+          grid: { display: false } 
+        },
+        y: {
+          position: 'left',
+          ticks: { 
+            color: '#94a3b8', 
+            font: { family: 'JetBrains Mono', size: 10.5 }, 
+            callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) 
+          },
+          grid: { color: '#f1f5f9' }
+        },
+        y1: { 
+          position: 'right', 
+          ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, 
+          grid: { display: false } 
+        }
+      }
+    }
+  });
+}
+
+function renderMonthChart(months){
+  const ctx = document.getElementById('monthChart');
+  const labels = (months||[]).map(m => `${monthNames[m.month-1]} ${String(m.year).slice(2)}`);
+  const counts = (months||[]).map(m => Number(m.no_of_sales||0));
+
+  if(monthChart) monthChart.destroy();
+
+  const chartCtx = ctx.getContext('2d');
+  const barGradient = chartCtx.createLinearGradient(0, 0, 0, 200);
+  barGradient.addColorStop(0, '#1e293b');
+  barGradient.addColorStop(1, '#334155');
+
+  monthChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Orders',
+        data: counts,
+        backgroundColor: barGradient,
+        hoverBackgroundColor: '#2563eb',
+        borderRadius: 5,
+        barThickness: 22
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0f172a',
+          titleColor: '#ffffff',
+          bodyColor: '#e2e8f0',
+          titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 700 },
+          bodyFont: { family: 'JetBrains Mono', size: 12 },
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, grid: { display: false } },
+        y: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, grid: { color: '#f1f5f9' } }
+      }
+    }
+  });
+}
+
+async function load(){
+  setStatus('loading', 'fetching…');
+  try{
+    const data = await fetchDashboard(dateInput.value);
+    renderKPIs(data.kpi_metrics);
+    renderLeaderboard(data.sales_rep_metrics);
+    renderDailyChart(data.daily_metrics);
+    renderMonthChart(data.month_metrics);
+    setStatus('', 'live · ' + new Date().toLocaleTimeString('en-IN'));
+  }catch(err){
+    console.error(err);
+    renderError(err);
+    setStatus('error', 'error');
+  }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', load);
+dateInput.addEventListener('change', load);
+
+setStatus('loading', 'loading chart library…');
+window.chartReady.finally(load);
+</script>
+
+</body>
+</html>
