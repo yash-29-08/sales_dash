@@ -765,10 +765,16 @@
   </div>
 </div>
 
-<script src="config.js"></script>
 <script>
-const SUPABASE_URL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.SUPABASE_URL) ? window.CONFIG.SUPABASE_URL : "";
-const SUPABASE_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.SUPABASE_KEY) ? window.CONFIG.SUPABASE_KEY : "";
+// Supabase credentials (anon/publishable key — safe for frontend)
+window.CONFIG = {
+  SUPABASE_URL: "https://lphusvuslgeezvpurlmj.supabase.co",
+  SUPABASE_KEY: "sb_publishable_CgvgcJJQHsB0lG6w0sJauw_MgIva20y"
+};
+</script>
+<script>
+const SUPABASE_URL = window.CONFIG.SUPABASE_URL;
+const SUPABASE_KEY = window.CONFIG.SUPABASE_KEY;
 
 const fmtINR = n => n == null ? '—' : '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const fmtNum = n => n == null ? '—' : Number(n).toLocaleString('en-IN');
