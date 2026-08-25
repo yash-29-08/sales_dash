@@ -716,9 +716,10 @@
   </div>
 </div>
 
+<script src="config.js"></script>
 <script>
-const SUPABASE_URL = "https://lphusvuslgeezvpurlmj.supabase.co";
-const SUPABASE_KEY = "sb_publishable_CgvgcJJQHsB0lG6w0sJauw_MgIva20y";
+const SUPABASE_URL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.SUPABASE_URL) ? window.CONFIG.SUPABASE_URL : "";
+const SUPABASE_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.SUPABASE_KEY) ? window.CONFIG.SUPABASE_KEY : "";
 
 const fmtINR = n => n == null ? '—' : '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const fmtNum = n => n == null ? '—' : Number(n).toLocaleString('en-IN');
@@ -742,6 +743,9 @@ dateInput.value = todayStr();
 let dailyChart, monthChart;
 
 async function fetchDashboard(reportDate){
+  if(!SUPABASE_URL || !SUPABASE_KEY || SUPABASE_URL.includes("YOUR_SUPABASE")){
+    throw new Error('Supabase credentials missing! Please configure config.js (or .env) with your SUPABASE_URL and SUPABASE_KEY.');
+  }
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_sales_dashboard`, {
     method: 'POST',
     headers: {

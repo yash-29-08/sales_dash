@@ -1,0 +1,13 @@
+# Environment Variables & Secrets (Do not commit to Git)
+.env
+.env.local
+.env.*.local
+config.js
+
+# Node modules / build output (if applicable)
+node_modules/
+dist/
+
+# OS specific files
+.DS_Store
+Thumbs.db
