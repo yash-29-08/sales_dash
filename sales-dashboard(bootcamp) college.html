@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sales Operations Dashboard — Executive Performance</title>
+<meta name="description" content="Real-time sales analytics dashboard with daily revenue, order volume, rep leaderboard and monthly trends.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   function loadScript(src){
     return new Promise((resolve, reject) => {
@@ -22,60 +23,72 @@
 </script>
 <style>
   :root {
-    --bg: #f8fafc;
+    /* Warm Light Palette — Orange · Pink · Red */
+    --bg: #fff7f4;
     --surface: #ffffff;
-    --surface-alt: #f1f5f9;
-    --surface-subtle: #f8fafc;
-    --border: #e2e8f0;
-    --border-hover: #cbd5e1;
-    
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --text-dim: #94a3b8;
-    
-    /* Professional & Restrained Color Palette */
-    --accent: #2563eb;
-    --accent-light: #eff6ff;
-    --accent-border: #bfdbfe;
-    
-    --brand-dark: #0f172a;
-    --brand-slate: #334155;
-    
-    --success: #10b981;
-    --success-light: #ecfdf5;
-    --success-border: #a7f3d0;
-    
+    --surface-alt: #fff1ec;
+    --surface-subtle: #fff7f4;
+    --border: #fdddd4;
+    --border-hover: #fbbfaa;
+
+    --text-main: #1a0a05;
+    --text-muted: #8b4a35;
+    --text-dim: #c48b7a;
+
+    /* Primary accent — deep orange */
+    --accent: #e8440a;
+    --accent-light: #fff1ec;
+    --accent-border: #fbbfaa;
+
+    /* Secondary accent — vivid pink */
+    --pink: #e8186d;
+    --pink-light: #fff0f6;
+    --pink-border: #fbb6d4;
+
+    /* Tertiary — warm red */
+    --red: #c0230f;
+    --red-light: #fff2f0;
+    --red-border: #ffb8b0;
+
+    --brand-dark: #c0230f;
+    --brand-warm: #e8440a;
+
+    --success: #2daa70;
+    --success-light: #edfbf3;
+    --success-border: #9ee8c3;
+
     --warning: #f59e0b;
     --warning-light: #fffbeb;
-    
-    --danger: #ef4444;
-    --danger-light: #fef2f2;
-    --danger-border: #fecaca;
 
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
-    
-    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
-    --shadow-hover: 0 8px 24px -4px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+    --danger: #dc1a2e;
+    --danger-light: #fff1f2;
+    --danger-border: #ffc4c9;
+
+    --radius-lg: 18px;
+    --radius-md: 13px;
+    --radius-sm: 9px;
+
+    --shadow-xs: 0 1px 2px rgba(200, 60, 20, 0.06);
+    --shadow-card: 0 2px 4px rgba(200, 60, 20, 0.05), 0 6px 16px -3px rgba(200, 60, 20, 0.06);
+    --shadow-hover: 0 10px 28px -5px rgba(200, 60, 20, 0.14), 0 3px 8px -2px rgba(200, 60, 20, 0.07);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   body {
     background-color: var(--bg);
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.03) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.02) 0px, transparent 50%);
+    background-image:
+      radial-gradient(at 0% 0%, rgba(232, 68, 10, 0.07) 0px, transparent 55%),
+      radial-gradient(at 100% 0%, rgba(232, 24, 109, 0.06) 0px, transparent 55%),
+      radial-gradient(at 50% 100%, rgba(192, 35, 15, 0.04) 0px, transparent 60%);
     color: var(--text-main);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     padding: 28px 32px 64px;
     -webkit-font-smoothing: antialiased;
   }
 
-  ::selection { background: var(--accent-light); color: var(--accent); }
+  ::selection { background: var(--pink-light); color: var(--pink); }
 
   .app-container {
     max-width: 1380px;
@@ -89,13 +102,24 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 18px;
-    padding: 20px 24px;
+    padding: 20px 28px;
     margin-bottom: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: linear-gradient(135deg, #fff7f4 0%, #ffffff 60%, #fff0f6 100%);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
     transition: border-color 0.2s ease;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--pink) 50%, var(--red) 100%);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 
   .brand-group {
@@ -105,15 +129,15 @@
   }
 
   .brand-icon {
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius-md);
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 4px 16px rgba(232, 68, 10, 0.30);
   }
 
   .brand-icon svg { width: 22px; height: 22px; }
@@ -121,7 +145,10 @@
   .brand-text h1 {
     font-size: 20px;
     font-weight: 800;
-    color: var(--text-main);
+    background: linear-gradient(90deg, var(--accent) 0%, var(--pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: -0.025em;
     line-height: 1.25;
   }
@@ -154,7 +181,7 @@
   .date-box:focus-within {
     border-color: var(--accent);
     background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(232, 68, 10, 0.12);
   }
 
   .date-box label {
@@ -169,9 +196,9 @@
     background: transparent;
     border: none;
     color: var(--text-main);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     outline: none;
     cursor: pointer;
   }
@@ -180,27 +207,29 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--brand-dark);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
     color: #ffffff;
-    border: 1px solid transparent;
-    font-weight: 600;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    border: none;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
     font-size: 13px;
-    padding: 9px 18px;
+    padding: 9px 20px;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    box-shadow: var(--shadow-xs);
+    box-shadow: 0 4px 14px rgba(232, 68, 10, 0.30);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.01em;
   }
 
   button#refreshBtn:hover {
-    background: #1e293b;
+    opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    box-shadow: 0 6px 20px rgba(232, 68, 10, 0.38);
   }
 
-  button#refreshBtn:active { 
-    transform: translateY(0); 
+  button#refreshBtn:active {
+    transform: translateY(0);
+    opacity: 1;
   }
 
   .status {
@@ -210,9 +239,9 @@
     padding: 8px 14px;
     border-radius: 99px;
     background: var(--surface-alt);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     font-size: 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     color: var(--text-muted);
     font-weight: 500;
   }
@@ -231,8 +260,8 @@
     animation: pulse 1s infinite alternate;
   }
 
-  .status.error .dot { 
-    background: var(--danger); 
+  .status.error .dot {
+    background: var(--danger);
     box-shadow: 0 0 0 2px var(--danger-light);
   }
 
@@ -258,7 +287,7 @@
   }
 
   .kpi-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     border-color: var(--border-hover);
     box-shadow: var(--shadow-hover);
   }
@@ -269,14 +298,22 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: var(--border);
-    transition: background 0.2s ease;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 
   .kpi-card:hover::before {
-    background: var(--accent);
+    opacity: 1;
   }
+
+  /* Colored top accent per card */
+  .kpi-card:nth-child(1)::before { background: linear-gradient(90deg, #e8440a, #f97a3a); }
+  .kpi-card:nth-child(2)::before { background: linear-gradient(90deg, #e8186d, #f05fa0); }
+  .kpi-card:nth-child(3)::before { background: linear-gradient(90deg, #c0230f, #e8440a); }
+  .kpi-card:nth-child(4)::before { background: linear-gradient(90deg, #9d1a6f, #e8186d); }
 
   .kpi-card-header {
     display: flex;
@@ -294,30 +331,29 @@
   }
 
   .kpi-icon-badge {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--surface-alt);
-    border: 1px solid var(--border);
-    color: var(--brand-slate);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
     transition: all 0.2s ease;
   }
 
-  .kpi-card:hover .kpi-icon-badge {
-    background: var(--accent-light);
-    color: var(--accent);
-    border-color: var(--accent-border);
-  }
+  .kpi-card:nth-child(1):hover .kpi-icon-badge { background: #fff1ec; color: var(--accent); border-color: var(--accent-border); }
+  .kpi-card:nth-child(2):hover .kpi-icon-badge { background: var(--pink-light); color: var(--pink); border-color: var(--pink-border); }
+  .kpi-card:nth-child(3):hover .kpi-icon-badge { background: var(--red-light); color: var(--red); border-color: var(--red-border); }
+  .kpi-card:nth-child(4):hover .kpi-icon-badge { background: #f9f0ff; color: #9d1a6f; border-color: #e4aadd; }
 
   .kpi-icon-badge svg { width: 17px; height: 17px; }
 
   .kpi-card .value {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-feature-settings: 'tnum';
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -0.03em;
@@ -330,17 +366,17 @@
     align-items: center;
     gap: 4px;
     padding: 4px 10px;
-    border-radius: 6px;
-    font-family: 'JetBrains Mono', monospace;
+    border-radius: 7px;
+    font-family: 'DM Mono', monospace;
     font-size: 11.5px;
-    font-weight: 600;
+    font-weight: 500;
     background: var(--surface-alt);
     border: 1px solid var(--border);
     color: var(--text-muted);
   }
 
-  .kpi-card .sub-tag b { 
-    color: var(--text-main); 
+  .kpi-card .sub-tag b {
+    color: var(--accent);
     font-weight: 700;
   }
 
@@ -387,6 +423,14 @@
     width: 100% !important;
   }
 
+  /* Panel left-border accent */
+  .panel {
+    border-left: 3.5px solid var(--accent);
+  }
+  .panel:nth-child(even) {
+    border-left-color: var(--pink);
+  }
+
   /* ---------- Rep Leaderboard ---------- */
   #leaderboard {
     display: flex;
@@ -407,7 +451,7 @@
   }
 
   #leaderboard::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: var(--accent-border);
     border-radius: 99px;
   }
 
@@ -445,19 +489,21 @@
     color: var(--text-muted);
   }
 
-  .rep-card:nth-child(1) .rep-rank-badge { 
-    background: var(--accent-light); 
-    color: var(--accent); 
-    border-color: var(--accent-border); 
+  .rep-card:nth-child(1) .rep-rank-badge {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(232, 68, 10, 0.30);
   }
-  .rep-card:nth-child(2) .rep-rank-badge { 
-    background: #f8fafc; 
-    color: var(--brand-slate); 
-    border-color: var(--border-hover);
+  .rep-card:nth-child(2) .rep-rank-badge {
+    background: var(--pink-light);
+    color: var(--pink);
+    border-color: var(--pink-border);
   }
-  .rep-card:nth-child(3) .rep-rank-badge { 
-    background: #f8fafc; 
-    color: var(--text-muted); 
+  .rep-card:nth-child(3) .rep-rank-badge {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent-border);
   }
 
   .rep-name {
@@ -479,23 +525,26 @@
 
   .rep-bar-fill {
     height: 100%;
-    background: var(--brand-dark);
+    background: linear-gradient(90deg, var(--accent), var(--pink));
     border-radius: 99px;
-    transition: width 0.4s ease;
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .rep-card:nth-child(1) .rep-bar-fill {
-    background: var(--accent);
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+  }
+  .rep-card:nth-child(2) .rep-bar-fill {
+    background: linear-gradient(90deg, var(--pink), #f05fa0);
   }
 
   .rep-nums {
     text-align: right;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
   }
 
   .rep-nums .rev {
-    color: var(--text-main);
+    color: var(--accent);
     font-weight: 700;
     display: block;
     font-size: 12.5px;
@@ -546,17 +595,17 @@
   }
 
   .stat-box val {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-feature-settings: 'tnum';
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 800;
-    color: var(--text-main);
+    color: var(--accent);
     display: block;
     letter-spacing: -0.02em;
   }
 
   .stat-box sub {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11.5px;
     color: var(--text-muted);
     display: block;
@@ -565,12 +614,12 @@
 
   /* Empty & Error State */
   .empty, .error-box {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12.5px;
     color: var(--text-muted);
     padding: 28px;
     text-align: center;
-    border: 1px dashed var(--border);
+    border: 1.5px dashed var(--border);
     border-radius: var(--radius-md);
     background: var(--surface-subtle);
   }
@@ -585,7 +634,7 @@
   .error-box b {
     display: block;
     color: var(--text-main);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-size: 14px;
     margin-bottom: 6px;
   }
@@ -846,9 +895,9 @@ function renderDailyChart(daily){
   if(dailyChart) dailyChart.destroy();
 
   const chartCtx = ctx.getContext('2d');
-  const blueGradient = chartCtx.createLinearGradient(0, 0, 0, 240);
-  blueGradient.addColorStop(0, 'rgba(37, 99, 235, 0.16)');
-  blueGradient.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+  const warmGradient = chartCtx.createLinearGradient(0, 0, 0, 240);
+  warmGradient.addColorStop(0, 'rgba(232, 68, 10, 0.18)');
+  warmGradient.addColorStop(1, 'rgba(232, 68, 10, 0.00)');
 
   dailyChart = new Chart(ctx, {
     data: {
@@ -856,22 +905,22 @@ function renderDailyChart(daily){
       datasets: [
         {
           type: 'bar', label: 'Orders', data: count, yAxisID: 'y1',
-          backgroundColor: 'rgba(148, 163, 184, 0.45)',
-          hoverBackgroundColor: 'rgba(100, 116, 139, 0.7)',
+          backgroundColor: 'rgba(251, 191, 170, 0.55)',
+          hoverBackgroundColor: 'rgba(232, 68, 10, 0.45)',
           borderWidth: 0,
-          borderRadius: 4,
+          borderRadius: 5,
           barThickness: 12
         },
         {
           type: 'line', label: 'Revenue', data: revenue, yAxisID: 'y',
-          borderColor: '#2563eb',
-          backgroundColor: blueGradient,
+          borderColor: '#e8440a',
+          backgroundColor: warmGradient,
           borderWidth: 2.5,
           tension: 0.35,
           fill: true,
           pointRadius: 3.5,
           pointHoverRadius: 6,
-          pointBackgroundColor: '#2563eb',
+          pointBackgroundColor: '#e8440a',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 2
         }
@@ -882,43 +931,43 @@ function renderDailyChart(daily){
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { 
-          labels: { 
-            color: '#64748b', 
-            font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
+        legend: {
+          labels: {
+            color: '#8b4a35',
+            font: { family: 'Outfit', size: 12, weight: 600 },
             usePointStyle: true,
             boxWidth: 8
-          } 
+          }
         },
         tooltip: {
-          backgroundColor: '#0f172a',
+          backgroundColor: '#1a0a05',
           titleColor: '#ffffff',
-          bodyColor: '#e2e8f0',
-          titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 700 },
-          bodyFont: { family: 'JetBrains Mono', size: 12 },
+          bodyColor: '#fdddd4',
+          titleFont: { family: 'Outfit', size: 12, weight: 700 },
+          bodyFont: { family: 'DM Mono', size: 12 },
           padding: 12,
-          cornerRadius: 8,
+          cornerRadius: 9,
           boxPadding: 4
         }
       },
       scales: {
-        x: { 
-          ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, 
-          grid: { display: false } 
+        x: {
+          ticks: { color: '#c48b7a', font: { family: 'DM Mono', size: 10.5 } },
+          grid: { display: false }
         },
         y: {
           position: 'left',
-          ticks: { 
-            color: '#94a3b8', 
-            font: { family: 'JetBrains Mono', size: 10.5 }, 
-            callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) 
+          ticks: {
+            color: '#c48b7a',
+            font: { family: 'DM Mono', size: 10.5 },
+            callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v)
           },
-          grid: { color: '#f1f5f9' }
+          grid: { color: '#fdddd4' }
         },
-        y1: { 
-          position: 'right', 
-          ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, 
-          grid: { display: false } 
+        y1: {
+          position: 'right',
+          ticks: { color: '#c48b7a', font: { family: 'DM Mono', size: 10.5 } },
+          grid: { display: false }
         }
       }
     }
@@ -934,8 +983,8 @@ function renderMonthChart(months){
 
   const chartCtx = ctx.getContext('2d');
   const barGradient = chartCtx.createLinearGradient(0, 0, 0, 200);
-  barGradient.addColorStop(0, '#1e293b');
-  barGradient.addColorStop(1, '#334155');
+  barGradient.addColorStop(0, '#e8440a');
+  barGradient.addColorStop(1, '#e8186d');
 
   monthChart = new Chart(ctx, {
     type: 'bar',
@@ -945,8 +994,8 @@ function renderMonthChart(months){
         label: 'Orders',
         data: counts,
         backgroundColor: barGradient,
-        hoverBackgroundColor: '#2563eb',
-        borderRadius: 5,
+        hoverBackgroundColor: '#c0230f',
+        borderRadius: 6,
         barThickness: 22
       }]
     },
@@ -956,18 +1005,18 @@ function renderMonthChart(months){
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#0f172a',
+          backgroundColor: '#1a0a05',
           titleColor: '#ffffff',
-          bodyColor: '#e2e8f0',
-          titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 700 },
-          bodyFont: { family: 'JetBrains Mono', size: 12 },
+          bodyColor: '#fdddd4',
+          titleFont: { family: 'Outfit', size: 12, weight: 700 },
+          bodyFont: { family: 'DM Mono', size: 12 },
           padding: 12,
-          cornerRadius: 8
+          cornerRadius: 9
         }
       },
       scales: {
-        x: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, grid: { display: false } },
-        y: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10.5 } }, grid: { color: '#f1f5f9' } }
+        x: { ticks: { color: '#c48b7a', font: { family: 'DM Mono', size: 10.5 } }, grid: { display: false } },
+        y: { ticks: { color: '#c48b7a', font: { family: 'DM Mono', size: 10.5 } }, grid: { color: '#fdddd4' } }
       }
     }
   });
